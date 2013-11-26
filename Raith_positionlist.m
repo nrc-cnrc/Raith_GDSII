@@ -61,6 +61,10 @@ classdef Raith_positionlist < handle
 %       sub-chip.
 %           mbyn - vector [m n] of the number of rows and columns of the
 %               matrix of sub-chips [optional]
+%
+%   shift(uv_sh) - shift current positionlist entries on the chip.
+%       uv_sh - vector [u_sh v_sh] specifying the shift of the overall 
+%           positionlist with respect to their current positions (mm)
 % 
 %   writepls([filepath]) - write positionlist
 %       filepath - full path of positionlist file, including .pls
@@ -302,11 +306,35 @@ classdef Raith_positionlist < handle
         % Reload positionlist
         for kC=1:length(UC)
             for k=1:length(pltemp)
-               obj.append(pltemp(k).name,pltemp(k).uv_c+[UC(kC) VC(kC)],pltemp(k).DF,pltemp(k).WA);
+               obj.append(pltemp(k).name,pltemp(k).uv_c+[UC(kC) VC(kC)],pltemp(k).DF,pltemp(k).WA,pltemp(k).layers);
             end
         end
         
         end % centre
+        
+        
+        function shift(obj,uv_sh)
+        %   Raith_positionlist.shift(uv_sh) - shift current positionlist
+        %   entries on the chip.
+        %
+        %   Argument:
+        %
+        %   uv_sh - vector [u_sh v_sh] specifying the relative shift of the
+        %       overall positionlist with respect to their current positions (mm)
+        %
+        
+        obj.checkposlist;  % Check that all poslist entries are of the correct format
+                   
+        pltemp=obj.poslist;  % Current poslist
+        
+        obj.poslist=[];  % Clear current poslist
+        
+        % Reload positionlist
+        for k=1:length(pltemp)
+           obj.append(pltemp(k).name,pltemp(k).uv_c+uv_sh,pltemp(k).DF,pltemp(k).WA,pltemp(k).layers);
+        end
+        
+        end % shift
         
         
         function writepls(obj,varargin)
