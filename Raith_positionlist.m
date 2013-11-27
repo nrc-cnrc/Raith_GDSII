@@ -171,12 +171,7 @@ classdef Raith_positionlist < handle
         if nargin==6
             layers=varargin{1};
         elseif nargin==5 % Determine all layers present in structure
-            STR=obj.library.structures(strcmp(obj.library.structlist,structname)); % Structure to be appended
-            C=cell(1,length(STR.elements));
-            [C{:}]=deal(STR.elements.type);
-            layins=~strcmp(C,'sref')&~strcmp(C,'aref');  % Indices of all elements in structure which are neither 'sref' or 'aref' (i.e., those that have a layer property)
-            [C{:}]=deal(STR.elements.data);
-            layers=unique(cellfun(@(x)x.layer,C(layins))); % All layers present in structure
+            layers=obj.alllayers(structname,[]);
         else
             error('Raith_positionlist:  too many arguments.')
         end
@@ -509,6 +504,28 @@ classdef Raith_positionlist < handle
             end
             
         end % checkposlist
+        
+        
+        function morelayers=alllayers(obj,structname,layers)
+        % Recursively find all layers present in a given structure,
+        % including 'sref' and 'aref' objects
+        
+            STR=obj.library.structures(strcmp(obj.library.structlist,structname)); % Structure to be appended
+            C=cell(1,length(STR.elements));
+            [C{:}]=deal(STR.elements.type);
+            explayins=~strcmp(C,'sref')&~strcmp(C,'aref');  % Indices of all elements in structure which are neither 'sref' or 'aref' (i.e., those that explicitly have a layer property)
+            refins=strcmp(C,'sref')|strcmp(C,'aref');  % Indices of all 'sref' or 'aref' elements
+            [C{:}]=deal(STR.elements.data);
+            explays=unique(cellfun(@(x)x.layer,C(explayins))); % All layers present in structure
+            morelayers=unique([layers explays]);
+            
+            % Grab all layers from 'sref' and 'aref' structures
+            refnames=unique(cellfun(@(x)x.name,C(refins),'UniformOutput',0));
+            for k=1:length(refnames)
+               morelayers=obj.alllayers(refnames{k},morelayers);
+            end
+            
+        end % alllayers
         
     end % hidden methods
     
