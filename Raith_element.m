@@ -821,24 +821,31 @@ classdef Raith_element < handle
     
     methods(Hidden)
         
-        function renderplot(obj,M,scDF,plflag)
+        function UV=renderplot(obj,M,scDF,plflag)
         %
-        % Raith_element.renderplot(obj,M,scDF,plflag) 
+        % UV=Raith_element.renderplot(obj,M,scDF,plflag) 
         %
         % Plot element with Raith dose factor colouring (called from
         % Raith_element.plot or Raith_element.plotedges)
         % 
-        % If plflag=1, plot as filled polygons where applicable
-        % (Raith_element.plot). If plflag=0, plot as polygon outlines where 
-        %  applicable (Raith_element.plotedges). 
+        % If plflag==1, plot as filled polygons where applicable
+        % (Raith_element.plot). If plflag==0, plot as polygon outlines where 
+        %  applicable (Raith_element.plotedges).  If plflag==2, do not
+        %  plot, but only return UV.
         %
-        % Argument:
+        % Arguments:
         %
         %   M - augmented transformation matrix for plot
         %   scDF - overall multiplicative scaling factor for DF specified
         %       in obj.data.DF (e.g., passed from a positionlist entry)
         %   plflag - flag for type of plot (1 for .plot, 0 for .plotedges)
         %
+        %
+        % Return value:
+        %
+        %   UV - 2 x n matrix [u;v] of points being plotted (um); for paths 
+        %       with nonzero width, returns points of underlying path; 
+        %       required by Raith_library.writegds for plain GDSII export
             
             hold on
             
@@ -847,10 +854,12 @@ classdef Raith_element < handle
                 
                 case 'polygon'
                     UV=M*[obj.data.uv;ones(1,size(obj.data.uv,2))];
-                    if plflag
+                    if plflag==1
                         fill(UV(1,:),UV(2,:),obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');
-                    else
+                    elseif plflag==0
                         plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
+                    else % plflag==2
+                        % Do not plot
                     end
                         
                         
@@ -864,16 +873,18 @@ classdef Raith_element < handle
                         w=0;
                     end
                         
-                    if w==0 % Single-pixel line
-                        plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));    
-                    else  % Finite-thickness line
-                        [outx,outy]=obj.plotpathwidth(UV(1,:),UV(2,:),w);
-                        if plflag
-                            fill(outx,outy,obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');    
-                        else
-                            plot(outx,outy,'color',obj.RaithDF(obj.data.DF*scDF));
-                        end
-                    end                
+                    if plflag~=2
+                        if w==0 % Single-pixel line
+                            plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));    
+                        else  % Finite-thickness line
+                            [outx,outy]=obj.plotpathwidth(UV(1,:),UV(2,:),w);
+                            if plflag==1
+                                fill(outx,outy,obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');    
+                            elseif plflag==0
+                                plot(outx,outy,'color',obj.RaithDF(obj.data.DF*scDF));
+                            end
+                        end                
+                    end
                     
                         
                 case 'dot'
@@ -883,8 +894,10 @@ classdef Raith_element < handle
                         DF=obj.data.DF*scDF;
                     end
                     UV=M*[obj.data.uv;ones(1,size(obj.data.uv,2))];
-                    for k=1:size(obj.data.uv,2)
-                       plot(UV(1,k),UV(2,k),'.','color',obj.RaithDF(DF(k)));
+                    if plflag~=2
+                        for k=1:size(obj.data.uv,2)
+                           plot(UV(1,k),UV(2,k),'.','color',obj.RaithDF(DF(k)));
+                        end
                     end
                     
                     
@@ -892,9 +905,9 @@ classdef Raith_element < handle
                     
                     mag=sqrt(abs(det(M)));  % Total magnification
                     w=obj.data.w; 
-                    if w>0
-                        w=abs(w)*mag;  % Positive w, so scale with everything else
-                    else  % Negative w:  default to filled element
+                    if w>=0
+                        w=w*mag;  % Positive w, so scale with everything else
+                    else  % Negative w:  default to filled element (Raith behaviour)
                         w=[];
                     end
                     
@@ -915,20 +928,22 @@ classdef Raith_element < handle
                         u_wr=[obj.data.uv_c(1) u_wr obj.data.uv_c(1)];
                         v_wr=[obj.data.uv_c(2) v_wr obj.data.uv_c(2)];
                         UV=M*[u_wr;v_wr;ones(size(u_wr))];
-                        if plflag
+                        if plflag==1
                             fill(UV(1,:),UV(2,:),obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');
-                        else
+                        elseif plflag==0
                             plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
                         end
                     elseif w==0 % Single pixel line
                         UV=M*[u_wr;v_wr;ones(size(u_wr))];
-                        plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
+                        if plflag~=2
+                            plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
+                        end
                     else % Line with some width
                         UV=M*[u_wr;v_wr;ones(size(u_wr))];
                         [outx,outy]=obj.plotpathwidth(UV(1,:),UV(2,:),w); 
-                        if plflag
+                        if plflag==1
                             fill(outx,outy,obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');    
-                        else
+                        elseif plflag==0
                             plot(outx,outy,'color',obj.RaithDF(obj.data.DF*scDF));
                         end
                     end
@@ -938,8 +953,8 @@ classdef Raith_element < handle
                     
                     mag=sqrt(abs(det(M)));  % Total magnification
                     w=obj.data.w; 
-                    if w>0
-                        w=abs(w)*mag;  % Positive w, so scale with everything else
+                    if w>=0
+                        w=w*mag;  % Positive w, so scale with everything else
                     else  % Negative w:  default to filled element
                         w=[];
                     end
@@ -954,7 +969,9 @@ classdef Raith_element < handle
                             u_wr=r*cos(th)+obj.data.uv_c(1);
                             v_wr=r*sin(th)+obj.data.uv_c(2);
                             UV=M*[u_wr;v_wr;ones(size(u_wr))];
-                            plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
+                            if plflag~=2
+                                plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
+                            end
                         else % Finite-width circle
                             u1=(r+w/2)*cos(th)+obj.data.uv_c(1);
                             v1=(r+w/2)*sin(th)+obj.data.uv_c(2);
@@ -963,9 +980,9 @@ classdef Raith_element < handle
                             u_wr=[u1 u2(end:-1:1) u1(1)];
                             v_wr=[v1 v2(end:-1:1) v1(1)];
                             UV=M*[u_wr;v_wr;ones(size(u_wr))];
-                            if plflag
+                            if plflag==1
                                 fill(UV(1,:),UV(2,:),obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');    
-                            else
+                            elseif plflag==0
                                 plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
                             end
                         end
@@ -973,9 +990,9 @@ classdef Raith_element < handle
                         u_wr=r*cos(th)+obj.data.uv_c(1);
                         v_wr=r*sin(th)+obj.data.uv_c(2);
                         UV=M*[u_wr;v_wr;ones(size(u_wr))];
-                        if plflag
+                        if plflag==1
                             fill(UV(1,:),UV(2,:),obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');    
-                        else
+                        elseif plflag==0
                             plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
                         end
                     end
@@ -985,8 +1002,8 @@ classdef Raith_element < handle
                     
                     mag=sqrt(abs(det(M)));  % Total magnification
                     w=obj.data.w; 
-                    if w>0
-                        w=abs(w)*mag;  % Positive w, so scale with everything else
+                    if w>=0
+                        w=w*mag;  % Positive w, so scale with everything else
                     else  % Negative w:  default to filled element
                         w=[];
                     end
@@ -1001,16 +1018,18 @@ classdef Raith_element < handle
                         u_wr=obj.data.uv_c(1)+r(1)*cos(t)*cos(phi)-r(2)*sin(t)*sin(phi);
                         v_wr=obj.data.uv_c(2)+r(1)*cos(t)*sin(phi)+r(2)*sin(t)*cos(phi);
                         UV=M*[u_wr;v_wr;ones(size(u_wr))];
-                        if plflag
+                        if plflag==1
                             fill(UV(1,:),UV(2,:),obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');    
-                        else
+                        elseif plflag==0
                             plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
                         end
                     elseif w==0 % Single pixel line
                         u_wr=obj.data.uv_c(1)+r(1)*cos(t)*cos(phi)-r(2)*sin(t)*sin(phi);
                         v_wr=obj.data.uv_c(2)+r(1)*cos(t)*sin(phi)+r(2)*sin(t)*cos(phi);
                         UV=M*[u_wr;v_wr;ones(size(u_wr))];
-                        plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
+                        if plflag~=2
+                            plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
+                        end
                     else % Line with some width:  approximate plot as a simply-connected polygon
                         r1=r-w/2;
                         r2=r+w/2;
@@ -1021,30 +1040,32 @@ classdef Raith_element < handle
                         u_wr=[u_out u_in(end:-1:1) u_out(1)];
                         v_wr=[v_out v_in(end:-1:1) v_out(1)];
                         UV=M*[u_wr;v_wr;ones(size(u_wr))];
-                        if plflag
+                        if plflag==1
                             fill(UV(1,:),UV(2,:),obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');    
-                        else
+                        elseif plflag==0
                             plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
                         end
                     end
                 
                     
                 case 'text'  % Render text as a structure of polygons, then plot
+                    UV=[obj.data.uv_0(1);obj.data.uv_0(2);1];
                     E=Raith_element;
                     T=E.rendertext(obj.data.layer,obj.data.uv_0,obj.data.h,obj.data.angle,obj.data.uv_align,obj.data.textlabel,obj.data.DF*scDF);
-                    if plflag
+                    if plflag==1
                         T.plot(M);
-                    else
+                    elseif plflag==0
                         T.plotedges(M);
                     end
                     
                     
                 case 'sref'  % Cannot plot structure, since sref element does not contain structure data; instead, mark origin as +, with structure name
                     UV=M*[obj.data.uv_0(1);obj.data.uv_0(2);1];
-                    plot(UV(1),UV(2),'.','MarkerEdgeColor','none');  % Plot point for proper axis display
-                    text(UV(1),UV(2),'+','color','r','HorizontalAlignment','center');
-                    text(UV(1),UV(2),sprintf(['\n\n[' obj.data.name ']']),'HorizontalAlignment','center','Interpreter','none');
-                    
+                    if plflag~=2
+                        plot(UV(1),UV(2),'.','MarkerEdgeColor','none');  % Plot point for proper axis display
+                        text(UV(1),UV(2),'+','color','r','HorizontalAlignment','center');
+                        text(UV(1),UV(2),sprintf(['\n\n[' obj.data.name ']']),'HorizontalAlignment','center','Interpreter','none');
+                    end
                         
                 case 'aref'  % Cannot plot structure, since aref element does not contain structure data; instead, mark origins as +, with structure name
                     
@@ -1070,14 +1091,21 @@ classdef Raith_element < handle
                     UaVa=M*[Ua;Va;ones(size(Ua))];
                     UV=M*[U;V;ones(size(U))];
                     
-                    plot(UaVa(1,:)+obj.data.uv_0(1),UaVa(2,:)+obj.data.uv_0(2),'.','MarkerEdgeColor','none');  % Plot points for proper axis display
-                    
-                    for k=1:length(U)
-                        text(UV(1,k)+obj.data.uv_0(1),UV(2,k)+obj.data.uv_0(2),'+','color','r','HorizontalAlignment','center');
-                        text(UV(1,k)+obj.data.uv_0(1),UV(2,k)+obj.data.uv_0(2),sprintf(['\n\n[' obj.data.name ']']),'HorizontalAlignment','center','Interpreter','none');
+                    if plflag~=2
+
+                        plot(UaVa(1,:)+obj.data.uv_0(1),UaVa(2,:)+obj.data.uv_0(2),'.','MarkerEdgeColor','none');  % Plot points for proper axis display
+
+                        for k=1:length(U)
+                            text(UV(1,k)+obj.data.uv_0(1),UV(2,k)+obj.data.uv_0(2),'+','color','r','HorizontalAlignment','center');
+                            text(UV(1,k)+obj.data.uv_0(1),UV(2,k)+obj.data.uv_0(2),sprintf(['\n\n[' obj.data.name ']']),'HorizontalAlignment','center','Interpreter','none');
+                        end
+                        
                     end
 
             end
+            
+            % Return points being plotted (for paths with nonzero width, returns points of underlying path); required by Raith_library.writegds for plain GDSII export
+            UV(3,:)=[];
                        
         end % renderplot
         
@@ -1209,7 +1237,7 @@ classdef Raith_element < handle
 
             m=(py(2:2:end)-py(1:2:end))./(px(2:2:end)-px(1:2:end)); % Slopes of line segments
 
-            if length(px)==2  % Single line segment
+            if size(px,2)==1  % Single line segment
             
                 % Vertices of line segments for clockwise-shifted outline
                 outx=[outx px'];
