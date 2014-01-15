@@ -407,7 +407,7 @@ classdef Raith_positionlist < handle
         
         function plotchip(obj)
             if ~ishandle(obj.hChip)  % Only replot if it isn't already in figure
-                obj.hChip=plot([0 1 1 0 0]*obj.chipUV(1)*1000,[0 0 1 1 0]*obj.chipUV(2)*1000,'k');  % Plot chip outlines
+                obj.hChip=fill([0 1 1 0 0]*obj.chipUV(1)*1000,[0 0 1 1 0]*obj.chipUV(2)*1000,'w','EdgeColor','k');  % Plot chip outlines
                 axis equal
             end
         end

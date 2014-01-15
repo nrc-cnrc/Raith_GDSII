@@ -183,7 +183,7 @@ classdef Raith_library < handle
         
         function writegds(obj,varargin)
         %
-        %   Raith_library.writegds([outdir]) - write Raith GDSII hierarchy file of 
+        %   Raith_library.writegds([outdir],[dialect]) - write Raith GDSII hierarchy file of 
         %       all structures as [library.name].csf
         %
         %   Argument:
@@ -191,14 +191,39 @@ classdef Raith_library < handle
         %       outdir - string specifying directory in which to write .csf file [optional]; 
         %           if called without arguments, file is written to working directory
         %
-            
+        %       dialect - string specifying dialect of GDSII to write
+        %           [optional]; may be 'Raith' (default) or 'plain'; if
+        %           'plain' is selected, Raith curved elements are
+        %           converted to boundary (polygon) or path elements, as
+        %           appropriate
+        %
             
             % See http://www.rulabinsky.com/cavd/text/chapc.html
 
-            if nargin==1 % No path for output directory
+            if nargin==1 % No path for output directory or dialect choice
                 outdir=pwd;
-            elseif nargin==2
-                outdir=varargin{1};
+                dialect='raith';
+            elseif nargin==2  % Either output directory or dialect is given
+                if any(strcmpi(varargin{1},{'Raith','plain'}))
+                    dialect=lower(varargin{1});
+                    outdir=pwd;
+                elseif isdir(varargin{1})
+                    outdir=varargin{1};
+                    dialect='raith';
+                else
+                    error('Raith_library.writegds:  invalid output directory or GDSII dialect.');
+                end
+            elseif nargin==3 % Both output directory and dialect are given, in that order
+                if isdir(varargin{1})
+                    outdir=varargin{1};
+                else
+                    error('Raith_library.writegds:  invalid output directory.');
+                end
+                if any(strcmpi(varargin{2},{'Raith','plain'}))
+                    dialect=lower(varargin{2});
+                else
+                   error('Raith_library.writegds:  invalid GDSII dialect.');
+                end 
             else
                 error('Raith_library.writegds:  too many arguments.');
             end
@@ -269,8 +294,25 @@ classdef Raith_library < handle
                 
                 % Write all elements in structure
                 for ke=1:numel(STR.elements)
-                    ELE=STR.elements(ke);  
-                    obj.writeelement(FileID,ELE);
+                    ELE=STR.elements(ke);
+                    if strcmp(dialect,'plain') && any(strcmp(ELE.type,{'arc','circle','ellipse'}))
+                        
+                        if isempty(ELE.data.w) % Filled object:  convert to polygon
+                            UV=ELE.renderplot(eye(3),1,2);  % Use polygon as rendered in Raith_element.plot
+                            wELE=Raith_element('polygon',ELE.data.layer,UV,ELE.data.DF);
+                        else  % Convert to path
+                            w=ELE.data.w;  % Original path width
+                            ELE.data.w=0;  % Set to single-pixel line to get vertices of underlying path
+                            UV=ELE.renderplot(eye(3),1,2);  % Use path as rendered in Raith_element.plot
+                            ELE.data.w=w;  % Restore original width
+                            wELE=Raith_element('path',ELE.data.layer,UV,ELE.data.w,ELE.data.DF);
+                        end
+                        
+                        disp(['          Converting ' ELE.type ' element to ' wELE.type]); 
+                    else
+                        wELE=ELE;
+                    end
+                    obj.writeelement(FileID,wELE);
                 end
                 
                 obj.writeendstruct(FileID);  % End the structure
