@@ -26,11 +26,15 @@ classdef Raith_library < handle
 %   append(S) - append Raith_structure S (or array thereof) to library; 
 %       structure names are checked for uniqueness
 %
-%   writegds([outdir]) - write Raith GDSII hierarchy file of all
+%   writegds([outdir],[dialect]) - write Raith GDSII hierarchy file of all
 %       structures as [library.name].csf
 %           outdir - string specifying directory in which to write .csf 
 %               file; if called without arguments, file is written to 
 %               working directory
+%           dialect - string specifying dialect of GDSII to write
+%               [optional]; may be 'Raith' (default) or 'plain'; if 'plain' 
+%               is selected, Raith curved elements are converted to 
+%               boundary (polygon) or path elements, as appropriate
 %
 %   plot(structname,[M,scDF]) - plot structure with Raith dose factor 
 %       colouring (filled polygons where applicable)

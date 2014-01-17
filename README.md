@@ -1,11 +1,11 @@
 Raith_GDSII MATLAB toolbox
 ==========================
 
-*Version 1.0*
+*Version 1.1*
 
 The four class definitions in this toolbox provide a simple, versatile, and scriptable means of generating patterns for [Raith](www.raith.com) electron-beam lithography (EBL) and focused ion beam (FIB) tools using [MATLAB](www.mathworks.com/products/matlab/).
 
-This toolbox was developed at the [National Institute for Nanotechnology](www.nint.ualberta.ca) (NINT), a joint initiative between the Government of Canada, the Government of Alberta, the [National Research Council Canada](www.nrc-cnrc.gc.ca) (NRC), and the [University of Alberta](www.ualberta.ca). 
+This toolbox was developed at the [National Institute for Nanotechnology](nint-innt.ca) (NINT), a joint initiative between the Government of Canada, the Government of Alberta, the [National Research Council Canada](www.nrc-cnrc.gc.ca) (NRC), and the [University of Alberta](www.ualberta.ca). 
 
 
 Features
@@ -15,6 +15,7 @@ Features
 * Plot patterns in MATLAB using Raith dose factor colouration, from individual GDSII elements to entire positionlists
 * Full support for Raith curved elements (circles, ellipses, arcs)  
 * Simply-connected font defined to use for text elements
+* Export pattern in plain GDSII (Raith curved elements converted to polygons and paths), to use with non-Raith GDSII editors **(new in v. 1.1)**
 
 
 Requirements and installation
