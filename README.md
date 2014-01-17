@@ -3,9 +3,9 @@ Raith_GDSII MATLAB toolbox
 
 *Version 1.1*
 
-The four class definitions in this toolbox provide a simple, versatile, and scriptable means of generating patterns for [Raith](www.raith.com) electron-beam lithography (EBL) and focused ion beam (FIB) tools using [MATLAB](www.mathworks.com/products/matlab/).
+The four class definitions in this toolbox provide a simple, versatile, and scriptable means of generating patterns for [Raith](http://www.raith.com) electron-beam lithography (EBL) and focused ion beam (FIB) tools using [MATLAB](http://www.mathworks.com/products/matlab/).
 
-This toolbox was developed at the [National Institute for Nanotechnology](nint-innt.ca) (NINT), a joint initiative between the Government of Canada, the Government of Alberta, the [National Research Council Canada](www.nrc-cnrc.gc.ca) (NRC), and the [University of Alberta](www.ualberta.ca). 
+This toolbox was developed at the [National Institute for Nanotechnology](http://nint-innt.ca) (NINT), a joint initiative between the Government of Canada, the Government of Alberta, the [National Research Council Canada](http://www.nrc-cnrc.gc.ca) (NRC), and the [University of Alberta](http://www.ualberta.ca). 
 
 
 Features
@@ -35,4 +35,4 @@ Please refer to `Raith_GDSII MATLAB Toolbox - User Guide.pdf` for a quick-start 
 License
 -------
 
-This toolbox is subject to the terms of the [Mozilla Public License, v. 2.0](mozilla.org/MPL/2.0/). 
+This toolbox is subject to the terms of the [Mozilla Public License, v. 2.0](http://mozilla.org/MPL/2.0/). 
