@@ -154,8 +154,8 @@ classdef Raith_element < handle
 % Aaron Hryciw
 % 2013-03-07
 %
-% Version 1.0
-% 2013-09-16
+% Version 1.1
+% 2014-01-17
 %
 %
 % The Raith_GDSII MATLAB toolbox was developed at the National Institute 
