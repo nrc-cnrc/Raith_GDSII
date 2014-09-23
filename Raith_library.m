@@ -65,14 +65,15 @@ classdef Raith_library < handle
 % Aaron Hryciw
 % 2013-03-07
 %
-% Version 1.1
-% 2014-01-17
+% Version 1.2
+% 2014-XX-XX
 %
 %
 % The Raith_GDSII MATLAB toolbox was developed at the National Institute 
 % for Nanotechnology (NINT), a joint initiative between the Government of 
 % Canada, the Government of Alberta, the National Research Council (NRC), 
-% and the University of Alberta.
+% and the University of Alberta.  If is currently maintained by the
+% University of Alberta nanoFAB facility.
 %
 % This Source Code Form is subject to the terms of the Mozilla Public
 % License, v. 2.0.  If a copy of the MPL was not distributed with this 
@@ -299,7 +300,7 @@ classdef Raith_library < handle
                 % Write all elements in structure
                 for ke=1:numel(STR.elements)
                     ELE=STR.elements(ke);
-                    if strcmp(dialect,'plain') && any(strcmp(ELE.type,{'arc','circle','ellipse'}))
+                    if strcmp(dialect,'plain') && any(strcmp(ELE.type,{'arc','circle','ellipse','fbmspath','fbmscircle'}))
                         
                         if isempty(ELE.data.w) % Filled object:  convert to polygon
                             UV=ELE.renderplot(eye(3),1,2);  % Use polygon as rendered in Raith_element.plot
@@ -780,7 +781,32 @@ classdef Raith_library < handle
                         Raith_library.writerec(FileID,16,3,XY);  % XY (1003)
                         Raith_library.writerec(FileID,17,0,[]);  % ENDEL (1100)
                     end
-
+                    
+                case 'fbmspath'  % FBMS path
+                    Raith_library.writerec(FileID,88,0,[]);  % Raith curved element (5800)
+                    Raith_library.writerec(FileID,13,2,ELE.data.layer);  % LAYER (0d02)
+                    Raith_library.writerec(FileID,14,2,1000*ELE.data.DF);  % DATATYPE (0e02); 1000*DF
+                    Raith_library.writerec(FileID,15,3,1000*ELE.data.w);  % WIDTH (0f03); in nm
+                    if isscalar(ELE.data.cvtr) % Zero curvature for all segments
+                        cvtr=zeros(1,size(ELE.data.uv,2));
+                    else
+                        cvtr=ELE.data.cvtr;
+                    end
+                    cvXY=[(cvtr~=0)+1;ELE.data.uv*1000;cvtr*1000]; % Each vertex specified by a quadruple:  [curvature_flag u_i v_i curvature_i], where curvature_flag is 1 (2) for line segment (arc)...
+                    cvXY(1)=0;  % ...except curvature_flag for the first vertex, which is always zero
+                    XY=[0 0 0 0 reshape(cvXY,1,numel(cvXY))];  % Reshape to 1D array of sequential XY pairs
+                    Raith_library.writerec(FileID,16,3,XY);  % XY (1003)
+                    Raith_library.writerec(FileID,17,0,[]);  % ENDEL (1100)
+                    
+                case 'fbmscircle'  % FBMS circle
+                    Raith_library.writerec(FileID,88,0,[]);  % Raith curved element (5800)
+                    Raith_library.writerec(FileID,13,2,ELE.data.layer);  % LAYER (0d02)
+                    Raith_library.writerec(FileID,14,2,1000*ELE.data.DF);  % DATATYPE (0e02); 1000*DF
+                    Raith_library.writerec(FileID,15,3,1000*ELE.data.w);  % WIDTH (0f03); in nm
+                    XY=[0 0 0 0 0 ELE.data.uv_c*1000 ELE.data.r*1000];  % Reshape to 1D array of sequential XY pairs
+                    Raith_library.writerec(FileID,16,3,XY);  % XY (1003)
+                    Raith_library.writerec(FileID,17,0,[]);  % ENDEL (1100)
+                    
                 case 'sref'  % Structure reference
                     Raith_library.writerec(FileID,10,0,[]);  % SREF (0A00)
                     Raith_library.writerec(FileID,18,6,ELE.data.name);  % SNAME (1206)            
