@@ -78,14 +78,15 @@ classdef Raith_positionlist < handle
 % Aaron Hryciw
 % 2013-03-07
 %
-% Version 1.1
-% 2014-01-17
+% Version 1.2
+% 2014-XX-XX
 %
 %
 % The Raith_GDSII MATLAB toolbox was developed at the National Institute 
 % for Nanotechnology (NINT), a joint initiative between the Government of 
 % Canada, the Government of Alberta, the National Research Council (NRC), 
-% and the University of Alberta.
+% and the University of Alberta.  If is currently maintained by the
+% University of Alberta nanoFAB facility.
 %
 % This Source Code Form is subject to the terms of the Mozilla Public
 % License, v. 2.0.  If a copy of the MPL was not distributed with this 

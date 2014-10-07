@@ -7,6 +7,8 @@ classdef Raith_element < handle
 % obj=Raith_element('circle',layer,uv_c,r,w,N,DF)
 % obj=Raith_element('ellipse',layer,uv_c,r,w,angle,N,DF)
 % obj=Raith_element('text',layer,uv_0,h,angle,uv_align,textlabel,DF)
+% obj=Raith_element('fbmspath',layer,uv,cvtr,w,DF)
+% obj=Raith_element('fbmscircle',layer,uv_c,r,w,DF)
 % obj=Raith_element('sref',name,uv_0,[mag,angle,reflect])
 % obj=Raith_element('aref',name,uv_0,n_colrow,a_colrow,[mag,angle,reflect])
 %
@@ -17,7 +19,8 @@ classdef Raith_element < handle
 % Arguments:
 %
 % type - type of element: must be either 'polygon', 'path', 'dot', 'arc',
-%   'circle', 'ellipse', 'text', 'sref', or 'aref'
+%   'circle', 'ellipse', 'text', 'fbmspath', 'fbmscircle', 'sref', or
+%   'aref'
 %
 % The number and identity of the remaining arguments depends on type:
 %
@@ -92,6 +95,31 @@ classdef Raith_element < handle
 %           ~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>? and [space]
 %       DF - dose factor for text
 %
+%   'fbmspath' (fixed beam moving stage path of line or arc segments)
+%       layer - GDSII layer for element (0-63)
+%       uv - path vertices; 2 x n matrix [u;v] (um)
+%       cvtr - curvature of path segments (um); if scalar and zero, the path 
+%           comprises line segments (no curvature); if a 1 x n vector, 
+%           cvtr(k) yields a circular arc with chord endpoints of uv(:,k-1) 
+%           and uv(:,k) such that the radial distance between the arc and 
+%           the chord centre is cvtr(k); a positive (negative) value of 
+%           cvtr(k) corresponds to an arc to the left (right) of the chord;
+%           the value of cvtr(1) is ignored if cvtr is 1 x n
+%       w - width of path (um); if zero, path is a single-pixel line (no 
+%           beam raster); if greater than zero, circle has a width (beam 
+%           rastered during stage motion)
+%       DF - dose factor for path
+%
+%   'fbmscircle' (fixed beam moving stage circle)
+%       layer - GDSII layer for element (0-63)
+%       uv_c - circle centre; 1 x 2 vector [u_c v_c] (um)
+%       r - radius of circle (um)
+%       w - width of circle (um); if zero, circle is a single-pixel line 
+%           (no beam raster); if greater than zero, circle has a width
+%           (beam rastered during stage motion)
+%       DF - dose factor for circle
+
+%
 %   'sref' (structure reference)
 %   N.B.!  Transformations are applied in the following order: 1. scaling, 
 %   mirroring; 2. rotation; 3. insertion.
@@ -130,7 +158,7 @@ classdef Raith_element < handle
 % Properties:
 %
 %   type - type of element:  'polygon', 'path', 'dot', 'arc', 'circle', 
-%       'ellipse', 'text', 'sref', or 'aref'
+%       'ellipse', 'text', 'fbmspath', 'fbmscircle', 'sref', or 'aref'
 %   data - remaining record data for element (depends on element type)
 %
 %
@@ -154,14 +182,15 @@ classdef Raith_element < handle
 % Aaron Hryciw
 % 2013-03-07
 %
-% Version 1.1
-% 2014-01-17
+% Version 1.2
+% 2014-XX-XX
 %
 %
 % The Raith_GDSII MATLAB toolbox was developed at the National Institute 
 % for Nanotechnology (NINT), a joint initiative between the Government of 
 % Canada, the Government of Alberta, the National Research Council (NRC), 
-% and the University of Alberta.
+% and the University of Alberta.  If is currently maintained by the
+% University of Alberta nanoFAB facility.
 %
 % This Source Code Form is subject to the terms of the Mozilla Public
 % License, v. 2.0.  If a copy of the MPL was not distributed with this 
@@ -250,7 +279,29 @@ classdef Raith_element < handle
                             Data.uv_align=varargin{5};
                             Data.textlabel=varargin{6}; 
                             Data.DF=varargin{7};
-                        end % text    
+                        end % text  
+                        
+                    case 'fbmspath' % Arguments:  layer, uv, cvtr, w, DF
+                        if nargin~=6
+                            error('Construct a Raith_element fbmspath as:  Raith_element(''fbmspath'',layer,uv,cvtr,w,DF).')
+                        else 
+                            Data.layer=varargin{1};
+                            Data.uv=varargin{2};  
+                            Data.cvtr=varargin{3};  
+                            Data.w=varargin{4};  
+                            Data.DF=varargin{5}; 
+                        end % fbmspath
+                        
+                    case 'fbmscircle' % Arguments:  layer, uv_c, r, w, DF
+                        if nargin~=6
+                            error('Construct a Raith_element fbmscircle as:  Raith_element(''fbmscircle'',layer,uv_c,r,w,DF).')
+                        else 
+                            Data.layer=varargin{1};
+                            Data.uv_c=varargin{2};  
+                            Data.r=varargin{3};  
+                            Data.w=varargin{4};  
+                            Data.DF=varargin{5}; 
+                        end % fbmscircle                        
                         
                     case 'sref' % Arguments:  name, uv_0, [mag, angle, reflect]
                         if nargin<3 || nargin>6
@@ -310,7 +361,7 @@ classdef Raith_element < handle
                         
                         
                     otherwise
-                        error('Raith_element type must be ''polygon'', ''path'', ''dot'', ''circle'', ''ellipse'', ''text'', ''sref'', or ''aref''.');
+                        error('Raith_element type must be ''polygon'', ''path'', ''dot'', ''circle'', ''ellipse'', ''text'', ''fbmspath'', ''fbmscircle'', ''sref'', or ''aref''.');
                         
                 end
                 
@@ -334,8 +385,8 @@ classdef Raith_element < handle
             
             else
 
-                if ~any(strcmp(Type,{'polygon','path','dot','arc','circle','ellipse','text','sref','aref'}))
-                    error('Raith_element type must be ''polygon'', ''path'', ''dot'', ''arc'', ''circle'', ''ellipse'', ''text'', ''sref'', or ''aref''.');
+                if ~any(strcmp(Type,{'polygon','path','dot','arc','circle','ellipse','text','fbmspath','fbmscircle','sref','aref'}))
+                    error('Raith_element type must be ''polygon'', ''path'', ''dot'', ''circle'', ''ellipse'', ''text'', ''fbmspath'', ''fbmscircle'', ''sref'', or ''aref''.')
                 end
 
                 obj.type=Type;
@@ -388,6 +439,20 @@ classdef Raith_element < handle
                         Data.uv_align=[];
                         Data.textlabel=[];
                         Data.DF=[];   
+
+                    case 'fbmspath'
+                        Data.layer=[];
+                        Data.uv=[];
+                        Data.cvtr=[];
+                        Data.w=[];
+                        Data.DF=[];       
+                        
+                    case 'fbmscircle'
+                        Data.layer=[];
+                        Data.uv_c=[];
+                        Data.r=[];
+                        Data.w=[];
+                        Data.DF=[];                          
 
                     case 'sref'
                         Data.name=[];
@@ -447,6 +512,9 @@ classdef Raith_element < handle
 
                         case 'r'
                             Data.r=round(Data.r*1000)/1000;  % Round r to nearest nm (1 nm data grid for Raith)
+                            
+                        case 'cvtr'
+                            Data.cvtr=round(Data.cvtr*1000)/1000;  % Round cvtr to nearest nm (1 nm data grid for Raith)
 
                         case 'w'
                             Data.w=round(Data.w*1000)/1000;  % Round w to nearest nm (1 nm data grid for Raith)
@@ -502,7 +570,17 @@ classdef Raith_element < handle
                             if ~isempty(setdiff(datafields,{'layer','uv_0','h','angle','uv_align','textlabel','DF'})) % Trying to set illegal field(s) for text
                                 error('Raith_element:  allowed data fields for ''text'' element type are ''layer'', ''uv_0'', ''h'', ''angle'', ''uv_align'', ''textlabel'', and ''DF''.');
                             end
-
+                            
+                        case 'fbmspath' % data fields:  layer, uv, cvtr, w, DF
+                            if ~isempty(setdiff(datafields,{'layer','uv','cvtr','w','DF'})) % Trying to set illegal field(s) for fbmspath
+                                error('Raith_element:  allowed data fields for ''fbmspath'' element type are ''layer'', ''uv'', ''cvtr'', ''w'', and ''DF''.');
+                            end
+                            
+                        case 'fbmscircle' % data fields:  layer, uv_c, r, w, DF
+                            if ~isempty(setdiff(datafields,{'layer','uv_c','r','w','DF'})) % Trying to set illegal field(s) for fbmscircle
+                                error('Raith_element:  allowed data fields for ''fbmscircle'' element type are ''layer'', ''uv_c'', ''r'', ''w'', and ''DF''.');
+                            end  
+                            
                         case 'sref' % data fields:  name, uv_0, mag, angle, reflect
                             if ~isempty(setdiff(datafields,{'name','uv_0','mag','angle','reflect','DF'})) % Trying to set illegal field(s) for sref
                                 error('Raith_element:  allowed data fields for ''sref'' element type are ''layer'', ''uv_0'', ''mag'', ''angle'', and ''reflect''.');
@@ -535,7 +613,7 @@ classdef Raith_element < handle
                                 end
 
                             case 'uv'
-                                % Check size ov uv
+                                % Check size of uv
                                 if ~isnumeric(Data.uv) || size(Data.uv,1)~=2
                                     error(['Raith_element ' obj.type ':  uv must a 2 x n matrix.']);
                                 end
@@ -549,10 +627,10 @@ classdef Raith_element < handle
                                             warning('Raith_element:openPolygon','Raith_element polygon is open; closing polygon.')
                                             Data.uv(:,end+1)=Data.uv(:,1);
                                         end
-                                    case 'path'
+                                    case {'path','fbmspath'}
                                         % Check that uv contains at least two vertices
                                         if size(Data.uv,2)<2
-                                            error('Raith_element path:  uv must contain at least two vertices.');
+                                            error(['Raith_element ' obj.type ':  uv must contain at least two vertices.']);
                                         end
                                 end
 
@@ -581,11 +659,11 @@ classdef Raith_element < handle
                                 Data.uv_c=round(Data.uv_c*1000)/1000;  % Round uv_c to nearest nm (1 nm data grid for Raith)
 
                             case 'r'
-                                if strcmp(obj.type,'circle')
+                                if strcmp(obj.type,'circle') || strcmp(obj.type,'fbmscircle')
                                     % Check that r is scalar
                                     if ~isnumeric(Data.r) || ~isscalar(Data.r) || Data.r<=0
-                                        error('Raith_element circle:  r must be a positive scalar.')
-                                    end
+                                        error(['Raith_element ' obj.type ':  r must be a positive scalar.'])
+                                    end                      
                                 elseif strcmp(obj.type,'ellipse')
                                     % Check that r is a vector of length 2
                                     if ~isnumeric(Data.r) || ~isvector(Data.r) || length(Data.r)~=2 || any(Data.r<=0)
@@ -598,6 +676,13 @@ classdef Raith_element < handle
                                     end
                                 end
                                 Data.r=round(Data.r*1000)/1000;  % Round r to nearest nm (1 nm data grid for Raith)
+                                
+                            case 'cvtr'                                
+                                % Check that cvtr is either 0 or a vector of the same length as uv
+                                if ~isnumeric(Data.cvtr) || ~isvector(Data.cvtr) || (length(Data.cvtr)~=size(Data.uv,2) && length(Data.cvtr)~=1) || (isscalar(Data.cvtr) && Data.cvtr~=0)
+                                    error('Raith_element fbmspath:  cvtr must either be 0 or a vector of length size(data.uv,2).')
+                                end
+                                Data.cvtr=round(Data.cvtr*1000)/1000;  % Round cvtr to nearest nm (1 nm data grid for Raith)
 
                             case 'w'
                                 % Check that w is scalar (may be negative)
@@ -996,7 +1081,7 @@ classdef Raith_element < handle
                             plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
                         end
                     end
-
+                        
                         
                 case 'ellipse' 
                     
@@ -1059,6 +1144,94 @@ classdef Raith_element < handle
                     end
                     
                     
+                case 'fbmspath'
+                    mag=sqrt(abs(det(M)));  % Total magnification
+                    UV=M*[obj.data.uv;ones(1,size(obj.data.uv,2))];
+                    w=abs(obj.data.w)*mag; % Defaults to non-negative (always scales) 
+                    
+                    if isscalar(obj.data.cvtr) % cvtr=0, so make vector
+                        cvtr=zeros(1,size(obj.data.uv,2)); 
+                    else
+                        cvtr=obj.data.cvtr*mag; 
+                    end
+                    
+                    % Construct arcs/line segments
+                    uwr=UV(1,1);
+                    vwr=UV(2,1);
+                    for k=2:length(cvtr)
+                        if cvtr(k)==0 % Line segment
+                            uwr=[uwr UV(1,k)];
+                            vwr=[vwr UV(2,k)];
+                        else % Arc
+                            % Construct three points for circle fitting
+                            P1=UV(1:2,k-1);
+                            P2=UV(1:2,k);
+                            Pmean=(P1+P2)/2; % Centre of chord                           
+                            theta=atan2(P2(2)-P1(2),P2(1)-P1(1))+sign(cvtr(k))*pi/2;
+                            P3=Pmean+abs(cvtr(k))*[cos(theta);sin(theta)];
+                            C=[norm(P1)^2 P1(1) P1(2) 1;norm(P2)^2 P2(1) P2(2) 1;norm(P3)^2 P3(1) P3(2) 1];
+                            UV_c=[det(C(:,[1 3 4]))/det(C(:,[2 3 4]))/2;-det(C(:,[1 2 4]))/det(C(:,[2 3 4]))/2]; % Centre of circle
+                            R=sqrt(norm(UV_c)^2+det(C(:,[1 2 3]))/det(C(:,[2 3 4])));  % Radius of circle
+                            th1=atan2(P1(2)-UV_c(2),P1(1)-UV_c(1)); % Angle from circle centre to P1
+                            th2=atan2(P2(2)-UV_c(2),P2(1)-UV_c(1)); % Angle from circle centre to P2
+                            th3=atan2(P3(2)-UV_c(2),P3(1)-UV_c(1)); % Angle from circle centre to P3
+                            if ~issorted(-sign(cvtr(k))*[th1  th3 th2]) % Adjust th1 if arc crosses negative y-axis
+                                th1=th1+sign(cvtr(k))*2*pi;
+                            end
+                            th=linspace(th1,th2,33);  % Chosen to match Raith software plotting
+                            th(1)=[];
+                            uwr=[uwr UV_c(1)+R*cos(th)];  
+                            vwr=[vwr UV_c(2)+R*sin(th)];
+                        end
+                    end
+                        
+                    if plflag~=2
+                        if w==0 % Single-pixel line
+                            plot(uwr,vwr,'color',obj.RaithDF(obj.data.DF*scDF));    
+                        else  % Finite-thickness line
+                            [outx,outy]=obj.plotpathwidth(uwr,vwr,w);
+                            if plflag==1
+                                fill(outx,outy,obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');    
+                            elseif plflag==0
+                                plot(outx,outy,'color',obj.RaithDF(obj.data.DF*scDF));
+                            end
+                        end                
+                    end
+                    
+                    
+                case 'fbmscircle' 
+                    
+                    mag=sqrt(abs(det(M)));  % Total magnification
+                    w=abs(obj.data.w)*mag; % Defaults to positive (always scales) 
+                    
+                    r=obj.data.r;
+                    
+                    vertices=64;  % Value used in Raith software when converting FBMS circle to path
+                    th=linspace(0,2*pi,vertices);                        
+                        
+                    if w==0  % Single-pixel line
+                        u_wr=r*cos(th)+obj.data.uv_c(1);
+                        v_wr=r*sin(th)+obj.data.uv_c(2);
+                        UV=M*[u_wr;v_wr;ones(size(u_wr))];
+                        if plflag~=2
+                            plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
+                        end
+                    else % Finite-width circle
+                        u1=(r+w/2)*cos(th)+obj.data.uv_c(1);
+                        v1=(r+w/2)*sin(th)+obj.data.uv_c(2);
+                        u2=(r-w/2)*cos(th)+obj.data.uv_c(1);
+                        v2=(r-w/2)*sin(th)+obj.data.uv_c(2);
+                        u_wr=[u1 u2(end:-1:1) u1(1)];
+                        v_wr=[v1 v2(end:-1:1) v1(1)];
+                        UV=M*[u_wr;v_wr;ones(size(u_wr))];
+                        if plflag==1
+                            fill(UV(1,:),UV(2,:),obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');    
+                        elseif plflag==0
+                            plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
+                        end
+                    end
+                    
+                    
                 case 'sref'  % Cannot plot structure, since sref element does not contain structure data; instead, mark origin as +, with structure name
                     UV=M*[obj.data.uv_0(1);obj.data.uv_0(2);1];
                     if plflag~=2
@@ -1066,7 +1239,8 @@ classdef Raith_element < handle
                         text(UV(1),UV(2),'+','color','r','HorizontalAlignment','center');
                         text(UV(1),UV(2),sprintf(['\n\n[' obj.data.name ']']),'HorizontalAlignment','center','Interpreter','none');
                     end
-                        
+                     
+                    
                 case 'aref'  % Cannot plot structure, since aref element does not contain structure data; instead, mark origins as +, with structure name
                     
                     % Construct lattice of origins for structures
@@ -1209,11 +1383,13 @@ classdef Raith_element < handle
         x=X;
         y=Y;
         th=0;
+        in=1;
 
         % Check for vertical segments (infinite slope)
         mch=(y(2:end)-y(1:(end-1)))./(x(2:end)-x(1:(end-1)));
-        while any(isinf(mch))
-            th=rand*pi;  % Rotate everything
+        while any(mch>1e10)  % Effectively infinite
+            in=in+1;
+            th=pi/2^in;  % Rotate everything
             xy=[cos(th) -sin(th);sin(th) cos(th)]*[X;Y];
             x=xy(1,:);
             y=xy(2,:);
