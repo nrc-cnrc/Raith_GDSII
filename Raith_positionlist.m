@@ -79,7 +79,7 @@ classdef Raith_positionlist < handle
 % 2013-03-07
 %
 % Version 1.2
-% 2014-XX-XX
+% 2014-10-07
 %
 %
 % The Raith_GDSII MATLAB toolbox was developed at the National Institute 
