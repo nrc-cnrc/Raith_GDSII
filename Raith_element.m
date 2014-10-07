@@ -91,8 +91,8 @@ classdef Raith_element < handle
 %           [u_align v_align]; allowed values are 0 (left/top), 1 (centre),
 %           2 (right/bottom) 
 %       textlabel - the text to be written (string); allowed characters are
-%           `1234567890-=qwertyuiop[]\asdfghjkl;'zxcvbnm,./
-%           ~!@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>? and [space]
+%           `1234567890-=qwertyuiop[]\asdfghjkl;'zxcvbnm,./~
+%           !@#$%^&*()_+QWERTYUIOP{}|ASDFGHJKL:"ZXCVBNM<>?µ and [space]
 %       DF - dose factor for text
 %
 %   'fbmspath' (fixed beam moving stage path of line or arc segments)
@@ -118,7 +118,6 @@ classdef Raith_element < handle
 %           (no beam raster); if greater than zero, circle has a width
 %           (beam rastered during stage motion)
 %       DF - dose factor for circle
-
 %
 %   'sref' (structure reference)
 %   N.B.!  Transformations are applied in the following order: 1. scaling, 
@@ -183,7 +182,7 @@ classdef Raith_element < handle
 % 2013-03-07
 %
 % Version 1.2
-% 2014-XX-XX
+% 2014-10-07
 %
 %
 % The Raith_GDSII MATLAB toolbox was developed at the National Institute 
