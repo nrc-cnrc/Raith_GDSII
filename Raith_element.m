@@ -1382,7 +1382,7 @@ classdef Raith_element < handle
         x=X;
         y=Y;
         th=0;
-        in=1;
+        in=0;  % Counter for number of rotations required to eliminate infinite slopes
 
         % Check for vertical segments (infinite slope)
         mch=(y(2:end)-y(1:(end-1)))./(x(2:end)-x(1:(end-1)));
@@ -1394,10 +1394,17 @@ classdef Raith_element < handle
             y=xy(2,:);
             mch=(y(2:end)-y(1:(end-1)))./(x(2:end)-x(1:(end-1)));
         end
+        
+        % Remove colinear vertices
+        alph=atan2(diff(y),diff(x));  % Angles between adjacent line segments
+        ins=[true abs(diff(alph))>1e-14 true];
+        x=x(ins);
+        y=y(ins);
 
         outx=[];
         outy=[];
 
+        
         for k=1:2 % Do procedure for path forwards and backwards to obtain outline
 
             alph=repmat(atan2(diff(y),diff(x)),2,1);  % Angles between adjacent line segments (in columns)

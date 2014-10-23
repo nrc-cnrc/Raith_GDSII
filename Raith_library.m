@@ -671,7 +671,7 @@ classdef Raith_library < handle
             Raith_library.writerec(FileID,0,2,3); % HEADER (0002); release info
             d=round(datevec(now));
             Raith_library.writerec(FileID,1,2,[d d]);  % BGNLIB (0102); last modified and accessed timestamps
-            Raith_library.writerec(FileID,2,6,[name '.csf']);  % LIBNAME (0206)
+            Raith_library.writerec(FileID,2,6,name);  % LIBNAME (0206)
             Raith_library.writerec(FileID,3,5,[1e-3 1e-9]);  % UNITS (0305)
             
         end % writehead
