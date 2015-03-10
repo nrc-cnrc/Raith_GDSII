@@ -377,7 +377,7 @@ classdef Raith_library < handle
                 
                 switch ELE.type
 
-                    case {'polygon','path','dot','circle','ellipse','text','arc'}
+                    case {'polygon','path','dot','circle','ellipse','text','arc','fbmspath','fbmscircle'}
                         ELE.plot(M,scDF);
                         
                     case 'sref'
@@ -817,7 +817,7 @@ classdef Raith_library < handle
                         Raith_library.writerec(FileID,27,5,ELE.data.mag);  % MAG (1B05)
                     end
                     if ELE.data.angle~=0
-                        Raith_library.writerec(FileID,28,5,ELE.data.angle);  % ANGLE (1A01)
+                        Raith_library.writerec(FileID,28,5,ELE.data.angle);  % ANGLE (1C01)
                     end
                     XY=[ELE.data.uv_0(1)*1000 ELE.data.uv_0(2)*1000];  % Single origin for structure reference (in nm)
                     Raith_library.writerec(FileID,16,3,XY);  % XY (1003)
@@ -833,7 +833,7 @@ classdef Raith_library < handle
                         Raith_library.writerec(FileID,27,5,ELE.data.mag);  % MAG (1B05)
                     end
                     if ELE.data.angle~=0
-                        Raith_library.writerec(FileID,28,5,ELE.data.angle);  % ANGLE (1A01)
+                        Raith_library.writerec(FileID,28,5,ELE.data.angle);  % ANGLE (1C01)
                     end
                     Raith_library.writerec(FileID,19,2,ELE.data.n_colrow);  % COLROW (1302)
                     XY=[ELE.data.uv_0(1) ELE.data.uv_0(2) ELE.data.uv_0(1)+ELE.data.n_colrow(1)*ELE.data.a_colrow(1) ELE.data.uv_0(2) ELE.data.uv_0(1) ELE.data.uv_0(2)+ELE.data.n_colrow(2)*ELE.data.a_colrow(2)]*1000;  % Corner instance origin, n_columns*column_spacing+ref_x, n_rows*row_spacing+ref_x (in nm)
