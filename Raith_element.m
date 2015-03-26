@@ -1386,7 +1386,7 @@ classdef Raith_element < handle
 
         % Check for vertical segments (infinite slope)
         mch=(y(2:end)-y(1:(end-1)))./(x(2:end)-x(1:(end-1)));
-        while any(mch>1e10)  % Effectively infinite
+        while any(abs(mch)>1e10)  % Effectively infinite
             in=in+1;
             th=pi/2^in;  % Rotate everything
             xy=[cos(th) -sin(th);sin(th) cos(th)]*[X;Y];
@@ -1394,6 +1394,10 @@ classdef Raith_element < handle
             y=xy(2,:);
             mch=(y(2:end)-y(1:(end-1)))./(x(2:end)-x(1:(end-1)));
         end
+        
+        % Remove repeated vertices
+        x(isnan(mch))=[];
+        y(isnan(mch))=[];
         
         % Remove colinear vertices
         alph=atan2(diff(y),diff(x));  % Angles between adjacent line segments
