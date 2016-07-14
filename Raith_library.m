@@ -254,7 +254,7 @@ classdef Raith_library < handle
                 allrefs=unique([C{ein}]);  % List of all structures referenced in 'sref' and 'aref' elements in library
 				matlabver = version;
 				% setdiff behaviour was changed in R2013a (Matlab version 8)
-				if matlabver(1) ~= '8'
+				if matlabver(1) <= '8'
 					missing=setdiff(allrefs,obj.structlist);  % Missing structures (those in allrefs that aren't in structlist)
 				else
 					missing=setdiff(allrefs,obj.structlist,'Legacy');  % Use legacy option for Matlab R2013a and later
