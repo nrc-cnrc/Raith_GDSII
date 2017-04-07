@@ -155,7 +155,7 @@ classdef Raith_positionlist < handle
         
         function append(obj,structname,uv_c,DF,WA,varargin)
         %
-        %   Raith_positionlist.append(structname,uv_c,DF,WA) - append 
+        %   Raith_positionlist.append(structname,uv_c,DF,WA,[layers]) - append 
         %       Raith_structure object to positionlist
         %
         %   Arguments:

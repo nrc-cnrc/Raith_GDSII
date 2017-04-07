@@ -128,8 +128,10 @@ classdef Raith_library < handle
                 error('Raith_library:  name must be a string.');
             end
             
-            if length(Name)>3 && strcmpi(Name((end-3):end),'.csf')
-                error('Raith_library:  name should not include .csf extension.')
+            if length(Name)>3 && (strcmpi(Name((end-3):end),'.csf') || strcmpi(Name((end-3):end),'.gds'))
+                xtn=Name((end-3):end);
+                Name((end-3):end)=[];  % Remove extension
+                warning(['Raith_library:  removing ' xtn ' from library name.'])
             end
             
             obj.name=Name;
@@ -813,10 +815,11 @@ classdef Raith_library < handle
                     if ELE.data.reflect
                         Raith_library.writerec(FileID,26,1,32768);  % STRANS (1A01); reflect in u
                     end
-                    if ELE.data.mag~=1
+                    if ELE.data.mag~=1 || ELE.data.angle~=0
+                        if ~ELE.data.reflect
+                            Raith_library.writerec(FileID,26,1,0);  % STRANS (1A01); no reflection in u
+                        end
                         Raith_library.writerec(FileID,27,5,ELE.data.mag);  % MAG (1B05)
-                    end
-                    if ELE.data.angle~=0
                         Raith_library.writerec(FileID,28,5,ELE.data.angle);  % ANGLE (1C01)
                     end
                     XY=[ELE.data.uv_0(1)*1000 ELE.data.uv_0(2)*1000];  % Single origin for structure reference (in nm)
@@ -829,10 +832,11 @@ classdef Raith_library < handle
                     if ELE.data.reflect
                         Raith_library.writerec(FileID,26,1,32768);  % STRANS (1A01); reflect in u
                     end
-                    if ELE.data.mag~=1
+                    if ELE.data.mag~=1 || ELE.data.angle~=0
+                        if ~ELE.data.reflect
+                            Raith_library.writerec(FileID,26,1,0);  % STRANS (1A01); no reflection in u
+                        end
                         Raith_library.writerec(FileID,27,5,ELE.data.mag);  % MAG (1B05)
-                    end
-                    if ELE.data.angle~=0
                         Raith_library.writerec(FileID,28,5,ELE.data.angle);  % ANGLE (1C01)
                     end
                     Raith_library.writerec(FileID,19,2,ELE.data.n_colrow);  % COLROW (1302)

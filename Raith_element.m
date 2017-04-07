@@ -1,5 +1,5 @@
 classdef Raith_element < handle
-    
+%    
 % obj=Raith_element('polygon',layer,uv,DF)
 % obj=Raith_element('path',layer,uv,w,DF)
 % obj=Raith_element('dot',layer,uv,DF)
