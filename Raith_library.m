@@ -603,8 +603,8 @@ classdef Raith_library < handle
                 
                 l=length(parameters)*lp;  % Length of parameters in bytes
                 
-                fwrite(FileID,ceil(l/2)*2+4,'integer*2','b'); % Record length
-                fwrite(FileID,[rectype datatype],'integer*1','b');  % Record and data types
+                fwrite(FileID,ceil(l/2)*2+4,'uint16','b'); % Record length
+                fwrite(FileID,[rectype datatype],'uint8','b');  % Record and data types
                 fwrite(FileID,parameters,fmt,'b');
                 
                 if mod(l,2)==1 % Odd-size parameter data
