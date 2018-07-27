@@ -235,6 +235,12 @@ classdef Raith_library < handle
                 error('Raith_library.writegds:  too many arguments.');
             end
             
+            if strcmpi(dialect,'plain')
+                ext = '.gds';
+            elseif strcmpi(dialect,'Raith')
+                ext = '.csf';
+            end
+            
             % Kludgy way to ensure structure name uniqueness (i.e., if
             % names were changed after assigning obj.structures); rewrite
             % using listeners in a later version.
@@ -283,9 +289,8 @@ classdef Raith_library < handle
                 slsh='\';
             end
             
-            FileID=fopen([outdir slsh obj.name '.csf'],'w');
-            
-            disp(['Writing ' outdir slsh obj.name '.csf...']);
+            FileID=fopen([outdir slsh obj.name ext],'w');            
+            disp(['Writing ' outdir slsh obj.name ext '...']);
             
             disp('     Header information');
             % Write all header information
