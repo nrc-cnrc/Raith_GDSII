@@ -1022,13 +1022,18 @@ classdef Raith_element < handle
                         if plflag~=2
                             plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
                         end
-                    else % Line with some width
+                    else % Line with some width; implemented as an annulus sector, not a path
+                        u_wr1=obj.data.uv_c(1)+(r(1)+w/2)*cos(t)*cos(phi)-(r(2)+w/2)*sin(t)*sin(phi);  % Outer edge
+                        v_wr1=obj.data.uv_c(2)+(r(1)+w/2)*cos(t)*sin(phi)+(r(2)+w/2)*sin(t)*cos(phi);
+                        u_wr2=obj.data.uv_c(1)+(r(1)-w/2)*cos(t)*cos(phi)-(r(2)-w/2)*sin(t)*sin(phi);  % Inner edge
+                        v_wr2=obj.data.uv_c(2)+(r(1)-w/2)*cos(t)*sin(phi)+(r(2)-w/2)*sin(t)*cos(phi);
+                        u_wr=[u_wr1(1) u_wr2 u_wr1(end:-1:1)];
+                        v_wr=[v_wr1(1) v_wr2 v_wr1(end:-1:1)];
                         UV=M*[u_wr;v_wr;ones(size(u_wr))];
-                        [outx,outy]=obj.plotpathwidth(UV(1,:),UV(2,:),w); 
                         if plflag==1
-                            fill(outx,outy,obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');    
+                            fill(UV(1,:),UV(2,:),obj.RaithDF(obj.data.DF*scDF),'EdgeColor','none');
                         elseif plflag==0
-                            plot(outx,outy,'color',obj.RaithDF(obj.data.DF*scDF));
+                            plot(UV(1,:),UV(2,:),'color',obj.RaithDF(obj.data.DF*scDF));
                         end
                     end
                      
