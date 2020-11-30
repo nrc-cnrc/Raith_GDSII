@@ -289,7 +289,7 @@ classdef Raith_library < handle
                 slsh='\';
             end
             
-            FileID=fopen([outdir slsh obj.name ext],'w');            
+            FileID=fopen([outdir slsh obj.name ext],'W');   % Use 'W' for buffered writing (increased speed)         
             disp(['Writing ' outdir slsh obj.name ext '...']);
             
             disp('     Header information');
