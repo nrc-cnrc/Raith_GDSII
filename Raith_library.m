@@ -309,7 +309,7 @@ classdef Raith_library < handle
                     ELE=STR.elements(ke);
                     if strcmp(dialect,'plain') && any(strcmp(ELE.type,{'arc','circle','ellipse','fbmspath','fbmscircle'}))
                         
-                        if isempty(ELE.data.w) ||  (ELE.data.w~=0 && any(strcmp(ELE.type,{'circle','ellipse','fbmscircle'}))) % Filled object:  convert to polygon
+                        if isempty(ELE.data.w) || (ELE.data.w~=0 && any(strcmp(ELE.type,{'arc','circle','ellipse','fbmscircle'}))) % Filled object:  convert to polygon
                             UV=ELE.renderplot(eye(3),1,2);  % Use polygon as rendered in Raith_element.plot
                             wELE=Raith_element('polygon',ELE.data.layer,UV,ELE.data.DF);
                         else  % Convert to path
